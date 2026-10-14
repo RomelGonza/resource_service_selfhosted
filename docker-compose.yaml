@@ -204,8 +204,6 @@ services:
         condition: service_started
       imgproxy:
         condition: service_started
-      rustfs-createbucket:
-        condition: service_completed_successfully
       rustfs:
         condition: service_healthy
     healthcheck:
@@ -431,6 +429,7 @@ services:
     entrypoint: '/bin/sh -ec " rc alias set supa-rustfs http://rustfs:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && rc mb --ignore-existing supa-rustfs/${GLOBAL_S3_BUCKET} "
 
       '
+    restart: 'no'
 volumes:
   db-config: null
   deno-cache: null
