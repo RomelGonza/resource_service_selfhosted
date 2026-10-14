@@ -43,7 +43,18 @@ services:
   api-gw:
     container_name: supabase-envoy
     image: envoyproxy/envoy:v1.39.1
-    restart: unless-stopped
+    restart: unless-stoppe
+    labels:
+      - "coolify.managed=true"
+      - "coolify.service=api-gw"
+      - "traefik.enable=true"
+      - "traefik.http.routers.supabase.rule=Host(`tudominio.com`)"
+      - "traefik.http.services.supabase.loadbalancer.server.port=8000"
+    networks:
+      default:
+        aliases:
+          - envoy
+          - kongd
     networks:
       default:
         aliases:
