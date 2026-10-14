@@ -3,7 +3,7 @@ services:
   studio:
     container_name: supabase-studio
     image: supabase/studio:2026.09.07-sha-7996410
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     healthcheck:
       test:
       - CMD-SHELL
@@ -43,7 +43,7 @@ services:
   api-gw:
     container_name: supabase-envoy
     image: envoyproxy/envoy:v1.39.1
-    restart: unless-stopped
+    restart: unless-stoppedd
     labels:
     - coolify.managed=true
     - coolify.service=api-gw
@@ -86,7 +86,7 @@ services:
   auth:
     container_name: supabase-auth
     image: supabase/gotrue:v2.196.0
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     healthcheck:
       test:
       - CMD
@@ -134,7 +134,7 @@ services:
   rest:
     container_name: supabase-rest
     image: postgrest/postgrest:v14.17
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     depends_on:
       db:
         condition: service_healthy
@@ -162,7 +162,7 @@ services:
   realtime:
     container_name: realtime-dev.supabase-realtime
     image: supabase/realtime:v2.134.10
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     depends_on:
       db:
         condition: service_healthy
@@ -196,7 +196,7 @@ services:
   storage:
     container_name: supabase-storage
     image: supabase/storage-api:v1.74.0
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     depends_on:
       db:
         condition: service_healthy
@@ -248,7 +248,7 @@ services:
   imgproxy:
     container_name: supabase-imgproxy
     image: darthsim/imgproxy:v3.31.4
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     volumes:
     - ./volumes/storage:/var/lib/storage:z
     healthcheck:
@@ -268,7 +268,7 @@ services:
   meta:
     container_name: supabase-meta
     image: supabase/postgres-meta:v0.99.0
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     depends_on:
       db:
         condition: service_healthy
@@ -283,7 +283,7 @@ services:
   functions:
     container_name: supabase-edge-functions
     image: supabase/edge-runtime:v1.76.2
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     volumes:
     - ./volumes/functions:/home/deno/functions:z
     - deno-cache:/root/.cache/deno
@@ -316,7 +316,7 @@ services:
   db:
     container_name: supabase-db
     image: supabase/postgres:17.6.1.136
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     volumes:
     - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
     - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
@@ -356,7 +356,7 @@ services:
   supavisor:
     container_name: supabase-pooler
     image: supabase/supavisor:2.9.12
-    restart: unless-stoppedd
+    restart: unless-stoppeddd
     ports:
     - ${POSTGRES_PORT}:5432
     - ${POOLER_PROXY_PORT_TRANSACTION}:6543
