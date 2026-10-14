@@ -38,8 +38,8 @@ services:
       SNIPPETS_MANAGEMENT_FOLDER: /app/snippets
       EDGE_FUNCTIONS_MANAGEMENT_FOLDER: /app/edge-functions
     volumes:
-    - ./volumes/snippets:/app/snippets:z
-    - ./volumes/functions:/app/edge-functions:ro,z
+    - /opt/supabase-project/volumes/snippets:/app/snippets:z
+    - /opt/supabase-project/volumes/functions:/app/edge-functions:ro,z
   api-gw:
     container_name: supabase-envoy
     image: envoyproxy/envoy:v1.39.1
@@ -66,10 +66,10 @@ services:
       studio:
         condition: service_healthy
     volumes:
-    - ./volumes/api/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
-    - ./volumes/api/envoy/cds.yaml:/etc/envoy/cds.yaml:ro
-    - ./volumes/api/envoy/lds.template.yaml:/etc/envoy/lds.template.yaml:ro
-    - ./volumes/api/envoy/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+    - /opt/supabase-project/volumes/api/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    - /opt/supabase-project/volumes/api/envoy/cds.yaml:/etc/envoy/cds.yaml:ro
+    - /opt/supabase-project/volumes/api/envoy/lds.template.yaml:/etc/envoy/lds.template.yaml:ro
+    - /opt/supabase-project/volumes/api/envoy/docker-entrypoint.sh:/docker-entrypoint.sh:ro
     environment:
       ANON_KEY: ${ANON_KEY}
       SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
@@ -244,13 +244,13 @@ services:
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
     volumes:
-    - ./volumes/storage:/var/lib/storage:z
+    - /opt/supabase-project/volumes/storage:/var/lib/storage:z
   imgproxy:
     container_name: supabase-imgproxy
     image: darthsim/imgproxy:v3.31.4
     restart: unless-stopped
     volumes:
-    - ./volumes/storage:/var/lib/storage:z
+    - /opt/supabase-project/volumes/storage:/var/lib/storage:z
     healthcheck:
       test:
       - CMD
@@ -285,7 +285,7 @@ services:
     image: supabase/edge-runtime:v1.76.2
     restart: unless-stopped
     volumes:
-    - ./volumes/functions:/home/deno/functions:z
+    - /opt/supabase-project/volumes/functions:/home/deno/functions:z
     - deno-cache:/root/.cache/deno
     depends_on:
       api-gw:
@@ -318,14 +318,14 @@ services:
     image: supabase/postgres:17.6.1.136
     restart: unless-stopped
     volumes:
-    - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
-    - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
-    - ./volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
-    - ./volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
+    - /opt/supabase-project/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+    - /opt/supabase-project/volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+    - /opt/supabase-project/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+    - /opt/supabase-project/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
     - db-data:/var/lib/postgresql/data
-    - ./volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
-    - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
-    - ./volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
+    - /opt/supabase-project/volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
+    - /opt/supabase-project/volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+    - /opt/supabase-project/volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
     - db-config:/etc/postgresql-custom
     healthcheck:
       test:
@@ -362,7 +362,7 @@ services:
     - ${POSTGRES_PORT}:5432
     - ${POOLER_PROXY_PORT_TRANSACTION}:6543
     volumes:
-    - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
+    - /opt/supabase-project/volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
     healthcheck:
       test:
       - CMD
