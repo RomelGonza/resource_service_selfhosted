@@ -40,16 +40,20 @@ services:
     volumes:
     - /opt/supabase-project/volumes/snippets:/app/snippets:z
     - /opt/supabase-project/volumes/functions:/app/edge-functions:ro,z
+
   api-gw:
     container_name: supabase-envoy
     image: envoyproxy/envoy:v1.39.1
     restart: unless-stopped
     labels:
-    - coolify.managed=true
-    - coolify.service=api-gw
-    - traefik.enable=true
-    - traefik.http.routers.supabase.rule=Host(`tudominio.com`)
-    - traefik.http.services.supabase.loadbalancer.server.port=8000
+    - "coolify.managed=true"
+    - "coolify.service=api-gw"
+    - "traefik.enable=true"
+    - "traefik.http.routers.supabase.rule=Host(`${SUPABASE_DOMAIN}`)"
+    - "traefik.http.routers.supabase.entrypoints=https"
+    - "traefik.http.routers.supabase.tls=true"
+    - "traefik.http.routers.supabase.tls.certresolver=letsencrypt"
+    - "traefik.http.services.supabase.loadbalancer.server.port=8000"
     networks:
       default:
         aliases:
@@ -83,6 +87,7 @@ services:
     entrypoint:
     - /bin/sh
     - /docker-entrypoint.sh
+
   auth:
     container_name: supabase-auth
     image: supabase/gotrue:v2.196.0
@@ -131,6 +136,7 @@ services:
       GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: ${MAILER_URLPATHS_EMAIL_CHANGE}
       GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
       GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
+
   rest:
     container_name: supabase-rest
     image: postgrest/postgrest:v14.17
@@ -159,10 +165,21 @@ services:
       PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY}
     command:
     - postgrest
+
   realtime:
     container_name: realtime-dev.supabase-realtime
     image: supabase/realtime:v2.134.10
     restart: unless-stopped
+    labels:
+    - "coolify.managed=true"
+    - "coolify.service=realtime"
+    - "traefik.enable=true"
+    - "traefik.http.routers.supabase-realtime.rule=Host(`${SUPABASE_DOMAIN}`) && PathPrefix(`/realtime/v1`)"
+    - "traefik.http.routers.supabase-realtime.priority=100"
+    - "traefik.http.routers.supabase-realtime.entrypoints=https"
+    - "traefik.http.routers.supabase-realtime.tls=true"
+    - "traefik.http.routers.supabase-realtime.tls.certresolver=letsencrypt"
+    - "traefik.http.services.supabase-realtime.loadbalancer.server.port=4000"
     depends_on:
       db:
         condition: service_healthy
@@ -193,6 +210,7 @@ services:
       SEED_SELF_HOST: 'true'
       RUN_JANITOR: 'true'
       DISABLE_HEALTHCHECK_LOGGING: 'true'
+
   storage:
     container_name: supabase-storage
     image: supabase/storage-api:v1.74.0
@@ -243,6 +261,7 @@ services:
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
     volumes:
     - /opt/supabase-project/volumes/storage:/var/lib/storage:z
+
   imgproxy:
     container_name: supabase-imgproxy
     image: darthsim/imgproxy:v3.31.4
@@ -263,6 +282,7 @@ services:
       IMGPROXY_USE_ETAG: 'true'
       IMGPROXY_AUTO_WEBP: ${IMGPROXY_AUTO_WEBP}
       IMGPROXY_MAX_SRC_RESOLUTION: 16.8
+
   meta:
     container_name: supabase-meta
     image: supabase/postgres-meta:v0.99.0
@@ -278,6 +298,7 @@ services:
       PG_META_DB_USER: postgres
       PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
       CRYPTO_KEY: ${PG_META_CRYPTO_KEY}
+
   functions:
     container_name: supabase-edge-functions
     image: supabase/edge-runtime:v1.76.2
@@ -311,6 +332,7 @@ services:
     - '150000'
     - --main-service
     - /home/deno/functions/main
+
   db:
     container_name: supabase-db
     image: supabase/postgres:17.6.1.136
@@ -352,6 +374,7 @@ services:
     - config_file=/etc/postgresql/postgresql.conf
     - -c
     - log_min_messages=fatal
+
   supavisor:
     container_name: supabase-pooler
     image: supabase/supavisor:2.9.12
@@ -400,6 +423,7 @@ services:
     - /bin/sh
     - -c
     - /app/bin/migrate && /app/bin/supavisor eval "$$(cat /etc/pooler/pooler.exs)" && /app/bin/server
+
   rustfs:
     image: rustfs/rustfs:v1.0.0-rc.5
     environment:
@@ -421,15 +445,16 @@ services:
       retries: 5
     volumes:
     - rustfs-data:/data
+
   rustfs-createbucket:
     image: rustfs/rc
     depends_on:
       rustfs:
         condition: service_healthy
     entrypoint: '/bin/sh -ec " rc alias set supa-rustfs http://rustfs:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && rc mb --ignore-existing supa-rustfs/${GLOBAL_S3_BUCKET} "
-
       '
     restart: 'no'
+
 volumes:
   db-config: null
   deno-cache: null
