@@ -170,6 +170,11 @@ services:
     container_name: realtime-dev.supabase-realtime
     image: supabase/realtime:v2.134.10
     restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - realtime
+          - realtime-dev.supabase-realtime
     labels:
     - "coolify.managed=true"
     - "coolify.service=realtime"
